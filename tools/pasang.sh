@@ -3,8 +3,7 @@ export DEBIAN_FRONTEND=noninteractive
 AO='-o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef'
 P=/sdcard/projects
 T=$P/tools
-R=$PREFIX/var/lib/proot-distro
-R=$R/installed-rootfs/ubuntu
+
 echo "[1] storage permission"
 termux-setup-storage
 i=0
@@ -44,9 +43,21 @@ echo "export OPENAI_API_KEY=$K"
 chmod 600 $P/.dsh-env
 fi
 echo "[4] ubuntu (~100MB, normal)"
-if [ ! -d $R ]; then
-proot-distro install ubuntu || exit 1
+n=0
+until proot-distro list 2>/dev/null | grep -qw ubuntu; do
+n=$((n+1))
+if [ $n -gt 3 ]; then
+echo "Ubuntu install failed after 3 attempts."
+exit 1
 fi
+echo "Attempt $n/3..."
+proot-distro install ubuntu
+if ! proot-distro list 2>/dev/null | grep -qw ubuntu; then
+echo "Attempt $n failed, cleaning up..."
+proot-distro remove ubuntu 2>/dev/null
+sleep 10
+fi
+done
 echo "[5] proot setup"
 cat > $T/proot-setup.sh << 'PS'
 export DEBIAN_FRONTEND=noninteractive
@@ -95,6 +106,10 @@ fi
 cat > $T/start-dsh.sh << 'LD'
 #!/system/bin/bash
 sshd 2>/dev/null
+if curl -s -o /dev/null --max-time 2 http://127.0.0.1:3080; then
+echo "dsh already running on port 3080"
+exit 0
+fi
 proot-distro login ubuntu -- \
 bash -c \
 "source /sdcard/projects/.dsh-env \
