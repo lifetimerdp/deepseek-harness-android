@@ -1,18 +1,21 @@
 # DeepSeek Harness for Android
 
-Run a DeepSeek coding agent (dsh) on any Android phone — no root required.
-Stack: Termux, proot Ubuntu, Node.js with real node-pty, web UI on port 3080.
+Run a coding agent on any Android phone - no root required.
+By default it ships the official DeepSeek Harness (dsh) with DeepSeek
+models, but the stack is provider-agnostic: any OpenAI-compatible endpoint
+(OpenRouter, Groq, OpenAI, Azure, local Ollama, ...) can be plugged in
+via environment overrides.
 
-Designed for one-command installs on fresh devices and for surviving Termux
-resets: all project data lives in /sdcard/projects, outside Termux storage.
+Stack: Termux, proot Ubuntu, Node.js with real node-pty, web UI on port 3080.
+All project data lives in /sdcard/projects, outside Termux private storage,
+so a Termux reset never destroys your work.
 
 ## Requirements
 
-- Device: Android 8+, about 1.5 GB free storage
-- Termux: install from F-Droid (the Play Store build is obsolete and breaks)
-- API key: a DeepSeek API key (platform.deepseek.com)
-- Network: stable internet during first install
-- Power: keep the charger plugged in during install
+- Android 8+, about 1.5 GB free storage
+- Termux from F-Droid (the Play Store build is obsolete and breaks)
+- An API key from any OpenAI-compatible provider (DeepSeek by default)
+- Stable internet during first install; keep the charger in
 
 ## Quick start (fresh phone)
 
@@ -21,79 +24,97 @@ resets: all project data lives in /sdcard/projects, outside Termux storage.
 
        termux-setup-storage
 
-   Tap Allow on the popup.
+   Tap Allow.
 
 3. Run the one-line installer:
 
        curl -fsSL https://raw.githubusercontent.com/lifetimerdp/deepseek-harness-android/main/boot.sh | bash
 
-4. When prompted "API key DeepSeek:" paste your key and press Enter.
-   This is the only manual input. The key is asked once and stored locally
-   at /sdcard/projects/.dsh-env (mode 600).
+4. Answer three prompts (only the key is required; the rest may be blank):
 
-5. Keep the charger in and wait until the installer prints its final
-   "== SELESAI ==" banner (10-30 minutes depending on network).
+       API key (DeepSeek or OpenAI-compatible): <paste your key>
+       Base URL (Enter = DeepSeek official):    <blank or your endpoint>
+       Model (Enter = deepseek-v4-flash):       <blank or a model id>
 
-6. Open http://127.0.0.1:3080 in your browser. Done.
+   Answers are stored once at /sdcard/projects/.dsh-env (mode 600).
 
-Note: some installer progress messages are in Indonesian; every prompt you
-need to answer is quoted exactly in this guide.
+5. Wait for the final banner (10-30 minutes depending on network):
+
+       == DONE: open http://127.0.0.1:3080 ==
+
+6. Open http://127.0.0.1:3080 and pick your model in the UI model menu.
+
+## Custom providers (optional)
+
+A DeepSeek key alone is enough for the default setup. To use another
+endpoint, add or edit exports in /sdcard/projects/.dsh-env, then restart:
+
+| Variable | Meaning |
+|---|---|
+| DEEPSEEK_API_KEY | key for the default deepseek-official provider |
+| DEEPSEEK_BASE_URL | override the DeepSeek endpoint (proxy/relay) |
+| DEEPSEEK_DEFAULT_MODEL | default model id for that endpoint |
+| OPENAI_API_KEY | key for the built-in OpenAI-compatible provider |
+| OPENAI_BASE_URL | its endpoint |
+| OPENAI_API_TYPE | wire format (chat completions vs responses) |
+| OPENAI_API_VERSION | api-version header (Azure-style endpoints) |
+
+Example OPENAI_BASE_URL values:
+
+- OpenAI: https://api.openai.com/v1
+- OpenRouter: https://openrouter.ai/api/v1
+- Groq: https://api.groq.com/openai/v1
+- Ollama (local): http://127.0.0.1:11434/v1
+
+The installer stores your key under both DEEPSEEK_API_KEY and
+OPENAI_API_KEY so either provider can be selected from the UI model menu.
 
 ## What the installer does
 
-1. Auto-selects the fastest reachable Termux mirror.
-2. Installs base packages (curl, proot-distro, ...) non-interactively.
+1. Points Termux at a package mirror (edit the sources.list line in
+   tools/pasang.sh to change it).
+2. Installs base packages non-interactively (curl, proot-distro,
+   OpenJDK 17, Android build tools).
 3. Installs an Ubuntu proot container.
-4. Sets up Node.js with a working node-pty inside Ubuntu.
-5. Applies the bundled fixes (fixkey.sh, fixpty.sh).
-6. Installs dsh, writes the launcher, starts the web UI on port 3080.
+4. Sets up Node.js 22 and the official @deepseek-ai/dsh with node-pty.
+5. Applies bundled fixes (fixkey.sh, fixpty.sh).
+6. Writes the launcher and starts the web UI on port 3080.
 
-It is idempotent: safe to re-run at any time. It only overwrites harness
-files; it never deletes or touches your own project data.
+Idempotent: safe to re-run; only harness files are overwritten,
+never your project data.
 
 ## Recovering a broken Termux
 
-If Termux ever hangs or breaks:
-
 1. Android Settings, Apps, Termux, Clear Data.
-2. Re-run the Quick start above.
-
-Everything in /sdcard/projects survives; you only re-download the toolchain.
+2. Re-run the Quick start. Everything in /sdcard/projects survives.
 
 ## Updating
 
-Re-run the one-liner from step 3. It fetches the latest harness from this
-repository and restarts the stack.
+Re-run the one-liner from step 3.
 
 ## Repository layout
 
-    boot.sh              Bootstrap: download repo, copy harness, run installer
-    tools/pasang.sh      Idempotent installer (auto mirror, non-interactive)
-    tools/fixkey.sh      SSH key / permission fix
-    tools/fixpty.sh      node-pty fix
-    tools/build-apk.sh   APK build pipeline
-    AGENTS.md            Built-in manual the agent reads (build flows, rules)
+    boot.sh            bootstrap: download repo, copy harness, run installer
+    tools/pasang.sh    idempotent installer (non-interactive packages)
+    tools/fixkey.sh    SSH key / permission fix
+    tools/fixpty.sh    node-pty fix
+    tools/build-apk.sh APK build pipeline
+    AGENTS.md          on-device SOP the agent reads (Indonesian by design)
 
 ## Security
 
-- This repository contains no API keys or secrets.
-- Your key is typed once on the device and stored at
-  /sdcard/projects/.dsh-env (mode 600).
-- boot.sh downloads only from this GitHub repository over HTTPS.
-- Never share .dsh-env or tokens. If a key leaks, rotate it on the
-  DeepSeek platform.
+- No API keys or secrets in this repository.
+- Keys are typed once on-device into /sdcard/projects/.dsh-env (mode 600).
+- boot.sh downloads only from this repository over HTTPS.
+- Rotate leaked keys at your provider.
 
 ## Troubleshooting
 
-- "cd: /sdcard" or permission errors: run termux-setup-storage, tap Allow,
-  re-run the one-liner.
-- Install looks stuck: usually network speed. Keep charger in; optionally
-  run termux-wake-lock in another session.
-- Port 3080 already in use: an older instance is running; stop it or reboot,
-  then re-run.
-- "dsh: not found" after Clear Data: expected — re-run the one-liner.
+- Permission errors: run termux-setup-storage, tap Allow, re-run.
+- Looks stuck: network speed; keep charger in; optionally termux-wake-lock.
+- Port 3080 in use: stop the old instance or reboot, then re-run.
+- Wrong key or provider: edit /sdcard/projects/.dsh-env, restart dsh.
 
-## Disclaimer
+## License
 
-Unofficial project, not affiliated with DeepSeek or Termux.
-Use at your own risk; keep your API key private.
+MIT. Unofficial project, not affiliated with DeepSeek or Termux.

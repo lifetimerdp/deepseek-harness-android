@@ -1,23 +1,22 @@
-export DEBIAN_FRONTEND=noninteractive
 #!/system/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 P=/sdcard/projects
 T=$P/tools
 R=$PREFIX/var/lib/proot-distro
 R=$R/installed-rootfs/ubuntu
-echo "[1] izin penyimpanan"
+echo "[1] storage permission"
 termux-setup-storage
 i=0
 until [ -w /sdcard ]; do
 i=$((i+1))
 if [ $i -gt 60 ]; then
-echo "Beri izin penyimpanan Android."
+echo "Grant the Android storage permission, then re-run."
 exit 1
 fi
 sleep 2
 done
 mkdir -p $T
-echo "[2] paket termux (lama, wajar)"
+echo "[2] termux packages (slow, normal)"
 echo "deb https://linux.domainesia.com/applications/termux/termux-main stable main" > $PREFIX/etc/apt/sources.list
 pkg up -y
 pkg in -y proot-distro \
@@ -26,18 +25,27 @@ aapt dx apksigner
 mkdir -p ~/.ssh
 ssh-keygen -A
 sshd 2>/dev/null
-echo "[3] kunci API"
+echo "[3] API key"
 if [ ! -f $P/.dsh-env ]; then
-echo -n "API key DeepSeek: "
+echo -n "API key (DeepSeek or OpenAI-compatible): "
 read -r K </dev/tty
-echo "export DEEPSEEK_API_KEY=$K" \
-> $P/.dsh-env
+echo -n "Base URL (Enter = DeepSeek official): "
+read -r B </dev/tty
+echo -n "Model (Enter = deepseek-v4-flash): "
+read -r M </dev/tty
+{
+echo "export DEEPSEEK_API_KEY=$K"
+echo "export OPENAI_API_KEY=$K"
+[ -n "$B" ] && echo "export DEEPSEEK_BASE_URL=$B"
+[ -n "$B" ] && echo "export OPENAI_BASE_URL=$B"
+[ -n "$M" ] && echo "export DEEPSEEK_DEFAULT_MODEL=$M"
+} > $P/.dsh-env
 chmod 600 $P/.dsh-env
 fi
-echo "[4] ubuntu (±100MB, wajar)"
+echo "[4] ubuntu (~100MB, normal)"
 [ -d $R ] || \
 proot-distro install ubuntu
-echo "[5] setup proot"
+echo "[5] proot setup"
 cat > $T/proot-setup.sh << 'PS'
 export DEBIAN_FRONTEND=noninteractive
 apt update -y
@@ -68,12 +76,11 @@ proot-distro login ubuntu -- \
 bash $T/proot-setup.sh
 proot-distro login ubuntu -- bash $T/fixkey.sh
 proot-distro login ubuntu -- bash $T/fixpty.sh
-# kunci ssh
 proot-distro login ubuntu -- cat /root/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
 sort -u ~/.ssh/authorized_keys \
 -o ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
-echo "[6] aset proyek"
+echo "[6] project assets"
 cp -f $P/AGENTS.md $P/CLAUDE.md
 chmod +x $T/build-apk.sh
 if [ ! -f $T/android.jar ]; then
@@ -92,7 +99,7 @@ bash -c \
 && exec dsh web"
 LD
 chmod +x $T/start-dsh.sh
-echo "== SELESAI: buka 127.0.0.1:3080 =="
+echo "== DONE: open http://127.0.0.1:3080 =="
 if ! command -v zipalign >/dev/null; then
 cat > $PREFIX/bin/zipalign << 'ZS'
 #!/system/bin/sh
