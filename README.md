@@ -88,6 +88,13 @@ never your project data.
 1. Android Settings, Apps, Termux, Clear Data.
 2. Re-run the Quick start. Everything in /sdcard/projects survives.
 
+## Daily use (after reboot)
+
+    bash /sdcard/projects/tools/start-dsh.sh
+
+Then open http://127.0.0.1:3080. If it says
+"dsh already running on port 3080", the server was already up.
+
 ## Updating
 
 Re-run the one-liner from step 3.
