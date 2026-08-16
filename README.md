@@ -11,7 +11,7 @@ Termux + proot Ubuntu + node-pty asli, tanpa root.
 1. Buka Termux: `termux-setup-storage` → Izinkan
 2. Satu baris:
 
-curl -fsSL https://raw.githubusercontent.com/lifetimrdp/deepseek-harness-android/main/boot.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lifetimerdp/deepseek-harness-android/main/boot.sh | bash
 
 3. Saat ditanya `API key DeepSeek:` → ketik key + Enter (satu-satunya input manual).
 4. Colok charger, tunggu `== SELESAI ==`, lalu buka http://127.0.0.1:3080
