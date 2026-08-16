@@ -1,5 +1,6 @@
 #!/system/bin/bash
 export DEBIAN_FRONTEND=noninteractive
+AO='-o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef'
 P=/sdcard/projects
 T=$P/tools
 R=$PREFIX/var/lib/proot-distro
@@ -17,11 +18,11 @@ sleep 2
 done
 mkdir -p $T
 echo "[2] termux packages (slow, normal)"
-echo "deb https://linux.domainesia.com/applications/termux/termux-main stable main" > $PREFIX/etc/apt/sources.list
-pkg up -y
-pkg in -y proot-distro \
+apt update -y || exit 1
+apt -y $AO upgrade || exit 1
+apt -y $AO install proot-distro \
 openssh curl openjdk-17 \
-aapt dx apksigner
+aapt dx apksigner || exit 1
 mkdir -p ~/.ssh
 ssh-keygen -A
 sshd 2>/dev/null
@@ -43,20 +44,22 @@ echo "export OPENAI_API_KEY=$K"
 chmod 600 $P/.dsh-env
 fi
 echo "[4] ubuntu (~100MB, normal)"
-[ -d $R ] || \
-proot-distro install ubuntu
+if [ ! -d $R ]; then
+proot-distro install ubuntu || exit 1
+fi
 echo "[5] proot setup"
 cat > $T/proot-setup.sh << 'PS'
 export DEBIAN_FRONTEND=noninteractive
+AO='-o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef'
 apt update -y
-apt -y install curl gnupg \
+apt -y $AO install curl gnupg \
 ca-certificates \
 openssh-client
 if ! command -v node >/dev/null; then
 curl -fsSL \
 https://deb.nodesource.com/setup_22.x \
 | bash -
-apt -y install nodejs
+apt -y $AO install nodejs
 fi
 node -v
 if ! command -v dsh >/dev/null; then
@@ -73,7 +76,7 @@ printf "permission:\n  defaultPreset: danger-full-access\n" > /root/.dsh/setting
 echo OK-PROOT
 PS
 proot-distro login ubuntu -- \
-bash $T/proot-setup.sh
+bash $T/proot-setup.sh || exit 1
 proot-distro login ubuntu -- bash $T/fixkey.sh
 proot-distro login ubuntu -- bash $T/fixpty.sh
 proot-distro login ubuntu -- cat /root/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys

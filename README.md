@@ -71,8 +71,8 @@ OPENAI_API_KEY so either provider can be selected from the UI model menu.
 
 ## What the installer does
 
-1. Points Termux at a package mirror (edit the sources.list line in
-   tools/pasang.sh to change it).
+1. Uses the default Termux package mirror (run termux-change-repo
+   for a regional one).
 2. Installs base packages non-interactively (curl, proot-distro,
    OpenJDK 17, Android build tools).
 3. Installs an Ubuntu proot container.
@@ -114,6 +114,10 @@ Re-run the one-liner from step 3.
 - Looks stuck: network speed; keep charger in; optionally termux-wake-lock.
 - Port 3080 in use: stop the old instance or reboot, then re-run.
 - Wrong key or provider: edit /sdcard/projects/.dsh-env, restart dsh.
+
+- If dpkg ever shows an openssl.cnf (Y/I/N/O) prompt, run:
+      dpkg --force-confold --force-confdef --configure -a
+  then re-run the one-liner.
 
 ## License
 
