@@ -44,7 +44,7 @@ chmod 600 $P/.dsh-env
 fi
 echo "[4] ubuntu (~100MB, normal)"
 n=0
-until proot-distro list 2>/dev/null | grep -qw ubuntu; do
+until timeout 60 proot-distro login ubuntu -- true >/dev/null 2>&1; do
 n=$((n+1))
 if [ $n -gt 3 ]; then
 echo "Ubuntu install failed after 3 attempts."
@@ -52,7 +52,7 @@ exit 1
 fi
 echo "Attempt $n/3..."
 proot-distro install ubuntu
-if ! proot-distro list 2>/dev/null | grep -qw ubuntu; then
+if ! timeout 60 proot-distro login ubuntu -- true >/dev/null 2>&1; then
 echo "Attempt $n failed, cleaning up..."
 proot-distro remove ubuntu 2>/dev/null
 sleep 10
