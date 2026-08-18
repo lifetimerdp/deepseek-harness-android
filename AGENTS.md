@@ -42,3 +42,13 @@
   `ask_user_question`, `subagent`, dll.) dipanggil dari dalam `run_code`.
 - Jika tool interaktif gagal dirender, ajukan pertanyaan sebagai teks biasa
   agar pengguna tetap bisa menjawab.
+
+## Build Android (proyek NASI)
+
+- Toolchain lengkap (JDK 17, SDK 36, build-tools 36, Gradle 8.13) ada di
+  proot ubuntu. JANGAN pasang apa pun di Termux maupun proot.
+- Semua perintah Gradle dijalankan lewat `bash tools/gradle-proot.sh <args>`
+  dari direktori proyek (contoh: `bash tools/gradle-proot.sh assembleDebug`).
+- local.properties proyek: `sdk.dir=/opt/android-sdk` (path di dalam proot).
+- Build pertama menarik dependensi Maven (±0,5–1 GB) di dalam proot; bila
+  terputus, ulangi perintah yang sama.
