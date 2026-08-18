@@ -27,10 +27,11 @@
 
 ## Tool failure protocols (Android/proot environment)
 
+- Pencarian web: sekali per sesi jalankan `bash` -> `printenv DEEPSEEK_API_KEY`.
+  Jika kosong/tidak ada: JANGAN panggil `web_search`; gunakan
+  `bash tools/web-lookup.sh "<query>"` untuk semua pencarian sesi itu.
+  Jika terisi: gunakan `web_search`; bila error credentials, pindah ke web-lookup.sh.
 - `job_output` -> "unknown job" dan `job_list` kosong: NORMAL untuk subagent
-  latar belakang (registry tidak memaparkannya). Hasil tiba otomatis lewat
-  injeksi konteks `subagent-settled`. Cek `list_agents`; bila running,
-  kerjakan hal lain atau `sleep 10` menunggu injeksi. Jangan retry
-  `job_output` lebih dari 2 kali.
-- `web_search` -> credentials error: fallback ke `bash` + `curl`
-  (DuckDuckGo HTML / Bing / GitHub API).
+  latar belakang; hasil tiba otomatis lewat injeksi `subagent-settled`.
+  Cek `list_agents`; bila running, tunggu (`sleep 10`) atau kerjakan hal lain.
+  Jangan retry `job_output` lebih dari 2 kali.
