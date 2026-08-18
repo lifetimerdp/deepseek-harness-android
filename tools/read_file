@@ -1,0 +1,40 @@
+#!/system/bin/bash
+# Accepts {"path": "..."} via stdin (JSONL)
+set -euo pipefail
+input=$(cat)
+if [ -z "$input" ]; then
+echo '{"error": "No input received"}' >&2
+exit 1
+fi
+path=$(printf '%s\n' "$input" | python3 -c "
+import json, sys
+try:
+    data = json.loads(sys.stdin.read())
+    print(data.get('path', ''))
+except Exception as e:
+    print('', end='')
+")
+if [ -z "$path" ]; then
+echo '{"error": "Missing or invalid \"path\" field in JSON input"}' >&2
+exit 1
+fi
+# Resolve relative paths against /sdcard/projects
+if [[ "$path" != /* ]]; then
+base="/sdcard/projects"
+path="$base/$path"
+fi
+if [ ! -f "$path" ]; then
+echo "{\"error\": \"File does not exist or is not a regular file: $path\"}" >&2
+exit 1
+fi
+if [ ! -r "$path" ]; then
+echo "{\"error\": \"Permission denied: $path\"}" >&2
+exit 1
+fi
+size_kb=$(( $(stat -c %s "$path") / 1024 ))
+if [ "$size_kb" -gt 1024 ]; then
+echo "{\"error\": \"File too large (>1MB): $path\"}" >&2
+exit 1
+fi
+content=$(cat "$path")
+echo "{\"content\": $(printf '%s' "$content" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

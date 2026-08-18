@@ -1,0 +1,41 @@
+#!/system/bin/bash
+# Accepts {"path": "..."} via stdin (JSONL)
+set -euo pipefail
+input=$(cat)
+if [ -z "$input" ]; then
+echo '{"error": "No input received"}' >&2
+exit 1
+fi
+path=$(printf '%s\n' "$input" | python3 -c "
+import json, sys
+try:
+    data = json.loads(sys.stdin.read())
+    print(data.get('path', ''))
+except Exception as e:
+    print('', end='')
+")
+if [ -z "$path" ]; then
+echo '{"error": "Missing or invalid \"path\" field in JSON input"}' >&2
+exit 1
+fi
+# Resolve relative paths against /sdcard/projects
+if [[ "$path" != /* ]]; then
+base="/sdcard/projects"
+path="$base/$path"
+fi
+if [ ! -e "$path" ]; then
+echo "{\"error\": \"Path does not exist: $path\"}" >&2
+exit 1
+fi
+if [ ! -r "$path" ]; then
+echo "{\"error\": \"Permission denied: $path\"}" >&2
+exit 1
+fi
+if [ -d "$path" ]; then
+ls -la "$path" | tail -n +2 | while read line; do
+echo "{\"entry\": \"$line\"}"
+done
+else
+echo "{\"error\": \"Path is not a directory: $path\"}" >&2
+exit 1
+fi
