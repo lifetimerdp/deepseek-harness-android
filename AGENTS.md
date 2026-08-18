@@ -27,9 +27,10 @@
 
 ## Tool failure protocols (Android/proot environment)
 
-- `job_output` -> "unknown job": known dsh registry lag; JANGAN menyerah.
-  1) `bash` -> `sleep 5`
-  2) `job_list` -> pastikan job_id terdaftar
-  3) ulangi `job_output` (wait:true); maksimal 5 percobaan sebelum lapor gagal.
+- `job_output` -> "unknown job" dan `job_list` kosong: NORMAL untuk subagent
+  latar belakang (registry tidak memaparkannya). Hasil tiba otomatis lewat
+  injeksi konteks `subagent-settled`. Cek `list_agents`; bila running,
+  kerjakan hal lain atau `sleep 10` menunggu injeksi. Jangan retry
+  `job_output` lebih dari 2 kali.
 - `web_search` -> credentials error: fallback ke `bash` + `curl`
-  (DuckDuckGo HTML / Bing / GitHub API) sampai kunci provider dikonfigurasi.
+  (DuckDuckGo HTML / Bing / GitHub API).
