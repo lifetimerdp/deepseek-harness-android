@@ -35,3 +35,10 @@
   latar belakang; hasil tiba otomatis lewat injeksi `subagent-settled`.
   Cek `list_agents`; bila running, tunggu (`sleep 10`) atau kerjakan hal lain.
   Jangan retry `job_output` lebih dari 2 kali.
+
+## Konvensi tambahan (semua model)
+
+- Hanya `run_code` yang callable langsung; semua tool lain (`bash`, `read`,
+  `ask_user_question`, `subagent`, dll.) dipanggil dari dalam `run_code`.
+- Jika tool interaktif gagal dirender, ajukan pertanyaan sebagai teks biasa
+  agar pengguna tetap bisa menjawab.
