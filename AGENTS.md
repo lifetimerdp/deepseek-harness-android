@@ -24,3 +24,8 @@
 ## Gaya
 - Ringkas, konkret, bhs Indonesia.
 - Error: tempel apa adanya + 1 perintah.
+
+## Tool usage protocols (Android/proot environment)
+
+- **Always use `wait: true` for `job_output`**: The first call to `job_output` after starting a subagent MUST include `"wait": true` in its arguments. This tells the harness to block until the job is ready, preventing the "unknown job" race condition. Example: `{"job_id": "...", "wait": true}`.
+- **`web_search` credentials**: If `web_search` fails due to missing API keys, fall back to using the `bash` tool with `curl` or `wget` to fetch information directly from the web.
