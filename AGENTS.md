@@ -52,3 +52,9 @@
 - local.properties proyek: `sdk.dir=/opt/android-sdk` (path di dalam proot).
 - Build pertama menarik dependensi Maven (±0,5–1 GB) di dalam proot; bila
   terputus, ulangi perintah yang sama.
+
+## Catatan aapt2 (JANGAN diubah)
+
+- `android.aapt2.fromMaven=false` sudah diset global di proot; aapt2 di
+  build-tools/36.0.0 sudah versi aarch64 (dari Termux). AGP wajib memakai
+  aapt2 build-tools ini.
