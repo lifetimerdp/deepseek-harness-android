@@ -62,3 +62,5 @@ ATURAN OTONOMI (menggeser aturan lama yang menyuruh meminta pengguna):
 - Skrip menolak menimpa build RUNNING; jangan akali dengan nohup manual.
 - Sebelum build besar pertama: `termux-wake-lock` (host) agar proses latar tidak
   dibunuh Android.
+- STATUS=CRASHED → proses mati tanpa marker (OOM/proot dibunuh): `log 80` untuk
+  diagnosa, perbaiki, `start` lagi.

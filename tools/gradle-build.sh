@@ -34,6 +34,8 @@ case "$cmd" in
       echo "STATUS=SUCCESS"
     elif grep -q "BUILD FAILED" "$LOG" 2>/dev/null; then
       echo "STATUS=FAILED"
+    elif [ -s "$LOG" ]; then
+      echo "STATUS=CRASHED"
     else
       echo "STATUS=IDLE"
     fi
