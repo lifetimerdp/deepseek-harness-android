@@ -1,3 +1,6 @@
 .dsh-env
 android.jar
 *.tar.gz
+
+nasi/build*.log
+.build/

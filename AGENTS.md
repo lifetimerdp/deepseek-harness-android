@@ -64,3 +64,16 @@ ATURAN OTONOMI (menggeser aturan lama yang menyuruh meminta pengguna):
   dibunuh Android.
 - STATUS=CRASHED → proses mati tanpa marker (OOM/proot dibunuh): `log 80` untuk
   diagnosa, perbaiki, `start` lagi.
+
+## Kekhasan harness run_code (JANGAN rediscover — hemat token)
+
+- Channel output run_code flaky saat operasi panjang: JANGAN andalkan stdout
+  inline; hasil build dibaca dari FILE log lewat Read/tail (nasi/buildN.log atau
+  .build/build.log), persis peta otonom.
+- Runner berbasis JS: backtick (`) dan ''' di konten Kotlin merusak template
+  literal ("Expected ';'"). Tulis file berisi karakter itu lewat Bash heredoc
+  quoted ('EOF'), jangan string inline JS.
+- Edit wajib Read file yang sama tepat sebelumnya; edit beruntun ke file sama
+  kena guard "file changed since read" → tulis ulang penuh lewat Bash lebih aman.
+- Jangan buat file ekor bantu (_bN.tail); tail langsung dari buildN.log.
+- Higiene log: setelah SUCCESS hapus buildN.log lama, sisakan 3 terakhir.
