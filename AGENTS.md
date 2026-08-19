@@ -77,3 +77,18 @@ ATURAN OTONOMI (menggeser aturan lama yang menyuruh meminta pengguna):
   kena guard "file changed since read" → tulis ulang penuh lewat Bash lebih aman.
 - Jangan buat file ekor bantu (_bN.tail); tail langsung dari buildN.log.
 - Higiene log: setelah SUCCESS hapus buildN.log lama, sisakan 3 terakhir.
+
+## Full debug TANPA adb (mode default)
+
+Sensor pengganti (tanpa adb, tanpa emulator):
+1. JVM: unit test + Robolectric, termasuk skenario UI Compose di JVM
+   (createComposeRule di test lokal — didukung resmi). Jalankan lewat
+   `gradle-build.sh start testDebugUnitTest`.
+2. Self-diagnostic app (build debug): UncaughtExceptionHandler global
+   menulis crash-<ts>.log; trace navigasi/aksi menulis trace.log —
+   semua ke /sdcard/projects/.build/ (izin akses file diminta sekali
+   saat pertama run). Agen MEMBACA file itu sebagai pengganti logcat/ui.
+Metode: tiap bug = failing test → perbaiki → hijau (regression permanen).
+Bug runtime dibaca dari crash/trace setelah pengguna memakai app normal.
+Tanpa adb TIDAK bisa: install & tap otomatis di perangkat → instalasi =
+pengguna tap APK sekali per build. device.sh tetap opsional bila adb ter-pair.
