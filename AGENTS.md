@@ -43,18 +43,22 @@
 - Jika tool interaktif gagal dirender, ajukan pertanyaan sebagai teks biasa
   agar pengguna tetap bisa menjawab.
 
-## Build Android (proyek NASI)
+## Build Android — peta otonom (proyek NASI)
 
-- Toolchain lengkap (JDK 17, SDK 36, build-tools 36, Gradle 8.13) ada di
-  proot ubuntu. JANGAN pasang apa pun di Termux maupun proot.
-- Semua perintah Gradle dijalankan lewat `bash tools/gradle-proot.sh <args>`
-  dari direktori proyek (contoh: `bash tools/gradle-proot.sh assembleDebug`).
-- local.properties proyek: `sdk.dir=/opt/android-sdk` (path di dalam proot).
-- Build pertama menarik dependensi Maven (±0,5–1 GB) di dalam proot; bila
-  terputus, ulangi perintah yang sama.
+Lingkungan (sudah terpasang manual oleh pengguna; JANGAN instal apa pun):
+- proot ubuntu: JDK 17, SDK 36 + build-tools 36.0.0 (aapt2 aarch64), Gradle 8.13.
+- `android.aapt2.fromMaven=false` sudah global; local.properties: `sdk.dir=/opt/android-sdk`.
+- Pin versi: AGP 8.9.1 + Kotlin 2.1.x; TANPA Gradle wrapper.
 
-## Catatan aapt2 (JANGAN diubah)
-
-- `android.aapt2.fromMaven=false` sudah diset global di proot; aapt2 di
-  build-tools/36.0.0 sudah versi aarch64 (dari Termux). AGP wajib memakai
-  aapt2 build-tools ini.
+ATURAN OTONOMI (menggeser aturan lama yang menyuruh meminta pengguna):
+- Agen TIDAK meminta pengguna menjalankan build — agen menjalankan sendiri.
+- Gradle sinkron (<60 dtk) lewat `bash tools/gradle-proot.sh <args>`.
+- Build/unduh apa pun: `bash tools/gradle-build.sh start <args>` dari direktori
+  proyek — kembali SEKETIKA karena build jalan di latar.
+- Polling: `bash tools/gradle-build.sh status` (seketika). RUNNING → kerjakan hal
+  berguna lain lalu poll lagi; SUCCESS → lanjut; FAILED →
+  `bash tools/gradle-build.sh log 80`, perbaiki kode, `start` lagi.
+- Gradle resumable & cache: error jaringan = `start` task yang sama lagi.
+- Skrip menolak menimpa build RUNNING; jangan akali dengan nohup manual.
+- Sebelum build besar pertama: `termux-wake-lock` (host) agar proses latar tidak
+  dibunuh Android.
