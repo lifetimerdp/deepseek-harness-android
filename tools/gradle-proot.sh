@@ -2,8 +2,7 @@
 # gradle-proot.sh <args> — jalankan Gradle di proot ubuntu (toolchain Android lengkap).
 set -uo pipefail
 PW=$(pwd)
-TP=/data/data/com.termux/files/usr
-exec proot-distro login --bind /system:/system --bind $TP:$TP ubuntu -- bash -c '
+exec proot-distro login ubuntu -- bash -c '
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 export ANDROID_HOME=/opt/android-sdk
 export ANDROID_SDK_ROOT=/opt/android-sdk
