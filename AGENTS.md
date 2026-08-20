@@ -126,3 +126,16 @@ pun ke pengguna, agen WAJIB melewati gerbang QA ini sendiri:
    Jangan pernah meminta pengguna menjalankan perintah teknis.
 Bila pengguna melaporkan "ada bug" tanpa daftar → langsung jalankan loop full
 debug di atas; temukan sendiri lewat sensor, jangan menunggu rincian.
+
+## QA cepat & tidak mengganggu pengguna (WAJIB)
+
+Masalah lama: loop LLM per-tap = menit per gerakan; E2E perangkat menyita layar.
+1. LATAR BELAKANG (default): test JVM (unit+Robolectric+Compose-JVM) via
+   `qa.sh bg`; agen poll log; pengguna BEBAS memakai HP selama itu.
+2. E2E perangkat = ONE-SHOT: skenario ditulis sekali (eksplorasi LLM boleh
+   hanya saat mengarang) lalu disimpan sebagai tools/scenarios/*.sh (urutan
+   device.sh tap/text/key + assert ui/log). Regresi = satu perintah, baca
+   hasil sekali. DILARANG loop LLM per-tap untuk regresi.
+3. Sebelum E2E: `qa.sh fast` (animasi 0) + cek `qa.sh idle`; bila pengguna
+   aktif → tunda atau minta izin SATU kalimat. E2E singkat; layar dikembalikan.
+4. Build Gradle berat: saat charging bila memungkinkan.
