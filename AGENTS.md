@@ -106,3 +106,23 @@ pengguna tap APK sekali per build. device.sh tetap opsional bila adb ter-pair.
   tap/text/key fitur-per-fitur → log saat anomali → NASI-BUGS.md → perbaiki →
   build → install → verifikasi ulang skenario gagal. Bug logika wajib jadi
   regression test (testDebugUnitTest).
+
+## Definition of Done — QA otonom WAJIB (semua proyek, tanpa diminta)
+
+Pengguna TIDAK perlu menyebut adb/testing/audit. Sebelum melaporkan hasil apa
+pun ke pengguna, agen WAJIB melewati gerbang QA ini sendiri:
+1. Build hijau (pakai peta build; catat warning).
+2. Audit statis mandiri: baca ulang diff — null-safety, lifecycle, izin,
+   kebocoran memori, ANR, edge case input.
+3. Test JVM hijau (testDebugUnitTest / suite proyek); setiap bug logika yang
+   diperbaiki WAJIB meninggalkan regression test baru.
+4. E2E: Android = `device.sh connect` (otonom) → install → launch → skenario
+   SEMUA fitur via ui/tap/text/key → `log` bersih. Web app = jalankan server
+   lokal, probe semua endpoint/halaman, cek status & konten.
+5. BUGS.md (NASI-BUGS.md untuk nasi): temuan dicatat → diperbaiki → build →
+   install → verifikasi ulang skenario gagal → ditutup. Loop sampai nol bug
+   terbuka.
+6. Baru lapor ke pengguna: ringkasan fitur + hasil QA + langkah pakai.
+   Jangan pernah meminta pengguna menjalankan perintah teknis.
+Bila pengguna melaporkan "ada bug" tanpa daftar → langsung jalankan loop full
+debug di atas; temukan sendiri lewat sensor, jangan menunggu rincian.
