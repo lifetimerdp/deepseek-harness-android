@@ -92,3 +92,17 @@ Metode: tiap bug = failing test → perbaiki → hijau (regression permanen).
 Bug runtime dibaca dari crash/trace setelah pengguna memakai app normal.
 Tanpa adb TIDAK bisa: install & tap otomatis di perangkat → instalasi =
 pengguna tap APK sekali per build. device.sh tetap opsional bila adb ter-pair.
+
+## Pairing permanen + reconnect otonom + full debug ADB
+
+- Pairing PERMANEN (kunci tersimpan di kedua sisi) — TIDAK ADA pairing ulang,
+  termasuk setelah restart/reboot.
+- Reconnect OTONOM tanpa manusia: `device.sh connect` = alamat tersimpan →
+  mDNS → scan port listener /proc/net/tcp. Biasanya DEVICE=READY sendiri
+  setelah reboot. Jalankan saat mulai sesi dan setiap kali koneksi putus.
+- Worst case jarang: toggle Wireless debugging OFF setelah reboot → pengguna
+  menyalakan sekali (satu tap, tanpa kode), lalu connect otonom lagi.
+- Loop full debug ADB: install (adb sendiri) → launch → ui → skenario
+  tap/text/key fitur-per-fitur → log saat anomali → NASI-BUGS.md → perbaiki →
+  build → install → verifikasi ulang skenario gagal. Bug logika wajib jadi
+  regression test (testDebugUnitTest).
